@@ -243,16 +243,20 @@ while (!workingCart.empty())
                                                                                             // contains the full description and price of the grocery item.
 
     ///////////////////////// TO-DO (7) //////////////////////////////
-if (found)
-{
-    amountDue += found->price();
-    std::cout << *found << '\n';
-}
-else
-{
-    // Print “free” for items not found in DB
-    std::cout << std::quoted(upc)
-              << " (pumpkin pie) not found => on the house!\n";
+  while (!checkoutCounter.empty()) {
+    auto upc = checkoutCounter.front().upcCode();
+    GroceryItem *found = worldWideDatabase.find(upc);
+    if (found) {
+        amountDue += found->price();
+        std::cout << std::quoted(found->upcCode()) << ",  "
+                  << std::quoted(found->brandName()) << ",  "
+                  << std::quoted(found->productName()) << ",  "
+                  << found->price() << "\n";
+    } else {
+        std::cout << std::quoted(upc)
+                  << " (pumpkin pie) not found, so today is your lucky day - You get it free! Hooray!\n";
+    }
+    checkoutCounter.pop();
 }
     /////////////////////// END-TO-DO (7) ////////////////////////////
 
