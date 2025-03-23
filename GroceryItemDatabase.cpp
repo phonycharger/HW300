@@ -1,6 +1,6 @@
 ///////////////////////// TO-DO (1) //////////////////////////////
-#include "GroceryItemDatabase.hpp"
 #include <filesystem>
+#include "GroceryItemDatabase.hpp"
 /////////////////////// END-TO-DO (1) ////////////////////////////
 
 
@@ -58,10 +58,11 @@ GroceryItemDatabase::GroceryItemDatabase( const std::string & filename )
   //
 
   ///////////////////////// TO-DO (2) //////////////////////////////
-  GroceryItem item;
-  while (fin >> item) {
-    _data[item.upcCode()] = std::move(item);
-  }
+GroceryItem item;
+while (fin >> item)
+{
+    _data.push_back(std::move(item));  // _data is a std::vector<GroceryItem>
+}
   /////////////////////// END-TO-DO (2) ////////////////////////////
 
   // Note:  The file is intentionally not explicitly closed.  The file is closed when fin goes out of scope - for whatever
@@ -80,26 +81,24 @@ GroceryItemDatabase::GroceryItemDatabase( const std::string & filename )
 ///////////////////////// TO-DO (3) //////////////////////////////
 namespace
 {
-  // A simple recursive helper to find a UPC in our map
-  GroceryItem * findRecursive(std::map<std::string, GroceryItem>::iterator current,
-                              std::map<std::string, GroceryItem>::iterator end,
-                              std::string const & upc)
-  {
-    if (current == end) return nullptr;              // base case: not found
-    if (current->first == upc) return &current->second;  // base case: found
-    return findRecursive(std::next(current), end, upc);  // recursive case
-  }
+    GroceryItem * findRecursive(std::vector<GroceryItem>::iterator current,
+                                std::vector<GroceryItem>::iterator end,
+                                std::string const & upc)
+    {
+        if (current == end) return nullptr; 
+        if (current->upcCode() == upc) return &(*current);
+        return findRecursive(std::next(current), end, upc);
+    }
 }
 
 GroceryItem * GroceryItemDatabase::find(const std::string & upc)
 {
-  // Start recursion from _data.begin() to _data.end()
-  return findRecursive(_data.begin(), _data.end(), upc);
+    // Start recursion from _data.begin() to _data.end()
+    return findRecursive(_data.begin(), _data.end(), upc);
 }
 
 std::size_t GroceryItemDatabase::size() const
 {
-  // Return total number of grocery items in the database
-  return _data.size();
+    return _data.size();
 }
 /////////////////////// END-TO-DO (3) ////////////////////////////
