@@ -137,17 +137,23 @@ namespace
   void carefully_move_grocery_items( std::size_t quantity, std::stack<GroceryItem> & broken_cart, std::stack<GroceryItem> & working_cart, std::stack<GroceryItem> & spare_cart )
   {
     ///////////////////////// TO-DO (1) //////////////////////////////
-if (quantity == 1) {
-    working_cart.push(broken_cart.top());
-    broken_cart.pop();
-    trace(broken_cart, working_cart, spare_cart);
-} else {
-    carefully_move_grocery_items(quantity - 1, broken_cart, spare_cart, working_cart);
-    working_cart.push(broken_cart.top());
-    broken_cart.pop();
-    trace(broken_cart, working_cart, spare_cart);
-    carefully_move_grocery_items(quantity - 1, spare_cart, working_cart, broken_cart);
-}
+if (quantity == 1)
+    {
+        // Move top item using std::move to avoid “excessive copying”
+        working_cart.push(std::move(broken_cart.top()));
+        broken_cart.pop();
+        trace(broken_cart, working_cart, spare_cart);
+    }
+    else
+    {
+        carefully_move_grocery_items(quantity - 1, broken_cart, spare_cart, working_cart);
+
+        working_cart.push(std::move(broken_cart.top()));
+        broken_cart.pop();
+        trace(broken_cart, working_cart, spare_cart);
+
+        carefully_move_grocery_items(quantity - 1, spare_cart, working_cart, broken_cart);
+    }
     /////////////////////// END-TO-DO (1) ////////////////////////////
   }
 
@@ -195,13 +201,14 @@ std::stack<GroceryItem> myCart;
     //      00075457129000   milk             any                     <===  heaviest item, put this on the bottom
 
     ///////////////////////// TO-DO (4) //////////////////////////////
-  auto &db = GroceryItemDatabase::instance();
-  myCart.push(*db.find("00688267039317"));  // eggs
-  myCart.push(*db.find("00835841005255"));  // bread
-  myCart.push(*db.find("09073649000493"));  // apple pie
-  myCart.push(*db.find("00025317533003"));  // hotdogs
-  myCart.push(*db.find("00038000291210"));  // rice krispies
-  myCart.push(*db.find("00075457129000"));  // milk
+auto & db = GroceryItemDatabase::instance();
+
+myCart.push(*db.find("00688267039317")); // eggs (top)
+myCart.push(*db.find("00835841005255")); // bread
+myCart.push(*db.find("09073649000493")); // apple pie
+myCart.push(*db.find("00025317533003")); // hotdogs
+myCart.push(*db.find("00038000291210")); // rice krispies
+myCart.push(*db.find("00075457129000")); // milk (bottom)
     /////////////////////// END-TO-DO (4) ////////////////////////////
 
 
@@ -209,8 +216,8 @@ std::stack<GroceryItem> myCart;
 
     // A wheel on my cart has just broken and I need to move grocery items to a new cart that works
     ///////////////////////// TO-DO (5) //////////////////////////////
-  std::stack<GroceryItem> workingCart;
-  carefully_move_grocery_items(myCart, workingCart);
+std::stack<GroceryItem> workingCart;
+carefully_move_grocery_items(myCart, workingCart);
     /////////////////////// END-TO-DO (5) ////////////////////////////
 
 
@@ -218,9 +225,11 @@ std::stack<GroceryItem> myCart;
 
     // Time to checkout and pay for all this stuff.  Find a checkout line and start placing grocery items on the counter's conveyor belt
     ///////////////////////// TO-DO (6) //////////////////////////////
-  std::queue<GroceryItem> checkoutCounter;
-  while (!workingCart.empty()) {
-    checkoutCounter.push(workingCart.top());
+std::queue<GroceryItem> checkoutCounter;
+while (!workingCart.empty())
+{
+    // push using move if you want
+    checkoutCounter.push(std::move(workingCart.top()));
     workingCart.pop();
 }
     /////////////////////// END-TO-DO (6) ////////////////////////////
@@ -234,20 +243,16 @@ std::stack<GroceryItem> myCart;
                                                                                             // contains the full description and price of the grocery item.
 
     ///////////////////////// TO-DO (7) //////////////////////////////
-  while (!checkoutCounter.empty()) {
-    auto upc = checkoutCounter.front().upcCode();
-    GroceryItem *found = worldWideDatabase.find(upc);
-    if (found) {
-        amountDue += found->price();
-        std::cout << std::quoted(found->upcCode()) << ",  "
-                  << std::quoted(found->brandName()) << ",  "
-                  << std::quoted(found->productName()) << ",  "
-                  << found->price() << "\n";
-    } else {
-        std::cout << std::quoted(upc)
-                  << " (pumpkin pie) not found, so today is your lucky day - You get it free! Hooray!\n";
-    }
-    checkoutCounter.pop();
+if (found)
+{
+    amountDue += found->price();
+    std::cout << *found << '\n';
+}
+else
+{
+    // Print “free” for items not found in DB
+    std::cout << std::quoted(upc)
+              << " (pumpkin pie) not found => on the house!\n";
 }
     /////////////////////// END-TO-DO (7) ////////////////////////////
 
