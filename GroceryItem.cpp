@@ -360,38 +360,34 @@ std::istream & operator>>( std::istream & stream, GroceryItem & groceryItem )
 
   char delimiter = '\x{00}';                                          // C++23 delimited escape sequence for the character whose value is zero (the null character)
   ///////////////////////// TO-DO (21) //////////////////////////////
-    GroceryItem working = groceryItem;
+if (delimiter) { /* do nothing */ }
 
-std::string upc, brand, product;
+    GroceryItem working = groceryItem;
+    std::string upc, brand, product;
     double price = 0.0;
     char c1 = '\0', c2 = '\0', c3 = '\0';
 
-    // Attempt to read from the stream
     if (stream >> std::ws
               >> std::quoted(upc) >> c1
               >> std::quoted(brand) >> c2
               >> std::quoted(product) >> c3
               >> price)
     {
-        // Check that the three chars are commas
         if (c1 == ',' && c2 == ',' && c3 == ',')
         {
-            // Everything read successfully: update the working object
             working._upcCode     = std::move(upc);
             working._brandName   = std::move(brand);
             working._productName = std::move(product);
             working._price       = price;
 
-            // Commit changes back to groceryItem
             groceryItem = std::move(working);
         }
         else
         {
-            // If delimiters wrong, set failbit (and do not change groceryItem)
             stream.setstate(std::ios::failbit);
         }
     }
-    // If the read fails at any point, groceryItem remains unchanged.
+    // If stream is bad, leave groceryItem unchanged.
 
     return stream;
   /////////////////////// END-TO-DO (21) ////////////////////////////
