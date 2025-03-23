@@ -149,10 +149,7 @@ std::string const & GroceryItem::upcCode() const &
 std::string const & GroceryItem::brandName() const &
 {
   ///////////////////////// TO-DO (9) //////////////////////////////
-std::string const & GroceryItem::brandName() const &
-{
     return _brandName;
-}
   /////////////////////// END-TO-DO (9) ////////////////////////////
 }
 
@@ -207,7 +204,6 @@ std::string GroceryItem::productName() &&
 {
   ///////////////////////// TO-DO (14) //////////////////////////////
     return std::move(_productName);
-}
   /////////////////////// END-TO-DO (14) ////////////////////////////
 }
 
@@ -228,7 +224,6 @@ GroceryItem & GroceryItem::upcCode( std::string newUpcCode ) &
   ///////////////////////// TO-DO (15) //////////////////////////////
     _upcCode = std::move(newUpcCode);
     return *this;
-}
   /////////////////////// END-TO-DO (15) ////////////////////////////
 }
 
@@ -367,7 +362,7 @@ std::istream & operator>>( std::istream & stream, GroceryItem & groceryItem )
   ///////////////////////// TO-DO (21) //////////////////////////////
     GroceryItem working = groceryItem;
 
-    std::string upc, brand, product;
+std::string upc, brand, product;
     double price = 0.0;
     char c1 = '\0', c2 = '\0', c3 = '\0';
 
@@ -382,10 +377,10 @@ std::istream & operator>>( std::istream & stream, GroceryItem & groceryItem )
         if (c1 == ',' && c2 == ',' && c3 == ',')
         {
             // Everything read successfully: update the working object
-            working._upcCode    = std::move(upc);
-            working._brandName  = std::move(brand);
-            working._productName= std::move(product);
-            working._price      = price;
+            working._upcCode     = std::move(upc);
+            working._brandName   = std::move(brand);
+            working._productName = std::move(product);
+            working._price       = price;
 
             // Commit changes back to groceryItem
             groceryItem = std::move(working);
@@ -396,7 +391,7 @@ std::istream & operator>>( std::istream & stream, GroceryItem & groceryItem )
             stream.setstate(std::ios::failbit);
         }
     }
-    // If stream read failed altogether, do not modify groceryItem.
+    // If the read fails at any point, groceryItem remains unchanged.
 
     return stream;
   /////////////////////// END-TO-DO (21) ////////////////////////////
